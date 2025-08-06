@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    kotlin("plugin.serialization") version "1.9.24"
+
 }
 
 kotlin {
@@ -42,6 +44,7 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.androidx.core.ktx)
             // Voyager
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.screenmodel)
@@ -49,12 +52,17 @@ kotlin {
             implementation(libs.voyager.tab.navigator)
             implementation(libs.voyager.transitions)
             implementation(libs.voyager.koin)
+            //Koin
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
             //Coil
             implementation(libs.landscapist.coil3)
             // Material Icons
             implementation(libs.material.icons.extended)
             //Placeholder
             implementation(libs.accompanist.placeholder.material)
+
+            implementation(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
