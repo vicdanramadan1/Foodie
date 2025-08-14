@@ -61,8 +61,11 @@ kotlin {
             implementation(libs.material.icons.extended)
             //Placeholder
             implementation(libs.accompanist.placeholder.material)
-
+            //Serialization
             implementation(libs.kotlinx.serialization.json)
+            //Firebase
+            implementation(libs.firebase.auth)
+            implementation(libs.firebase.firestore)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
