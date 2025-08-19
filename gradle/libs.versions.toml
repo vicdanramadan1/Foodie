@@ -20,7 +20,7 @@ accompanistPlaceholderMaterial = "0.32.0"
 koin = "3.4.3"
 koin-compose = "1.0.4"
 google-services = "4.4.3"
-firebase = "2.1.0"
+firebase = "2.2.0"
 kotlinx-coroutines-core = "1.8.1"
 kotlinx-serialization = "1.8.1"
 

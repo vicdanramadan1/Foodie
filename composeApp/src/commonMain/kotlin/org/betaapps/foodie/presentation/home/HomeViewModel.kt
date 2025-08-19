@@ -22,7 +22,6 @@ class HomeViewModel(
 
    init {
         screenModelScope.launch {
-            _restaurants.value = getRestaurantsUseCase.invoke()
 
         }
    }

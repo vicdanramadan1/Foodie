@@ -33,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.betaapps.foodie.data.repository.AuthRepositoryImpl
+import org.betaapps.foodie.presentation.dashboard.DashboardScreen
 import org.jetbrains.compose.resources.painterResource
 
 object LoginScreen : Screen {
@@ -88,7 +89,9 @@ object LoginScreen : Screen {
                 Text("Login")
             }
 
-            loginState?.onSuccess {}?.onFailure {
+            loginState?.onSuccess {
+                navigator.push(DashboardScreen())
+            }?.onFailure {
                 Text("Login failed: ${it.message}", color = Color.Red)
             }
         }
