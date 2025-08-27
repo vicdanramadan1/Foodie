@@ -1,5 +1,8 @@
 package org.betaapps.foodie.data.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Order(
     val id: String,
     val userId: String,
