@@ -4,13 +4,43 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.StateFlow
+import org.betaapps.foodie.domain.model.Input
 import org.betaapps.foodie.domain.model.Response
 import org.betaapps.foodie.domain.usecases.LoginUseCase
+import org.betaapps.foodie.domain.validation.EmailValidator
+import org.betaapps.foodie.domain.validation.InputValidationResult
+import org.betaapps.foodie.domain.validation.PasswordValidator
 
-class LoginViewModel(private val loginUseCase: LoginUseCase) : ScreenModel {
+class LoginViewModel(
+
+    private val loginUseCase: LoginUseCase,
+) : ScreenModel {
 
     private val _loginState = MutableStateFlow(LoginScreenState())
-    val loginState = _loginState
+    val loginState: StateFlow<LoginScreenState> = _loginState
+
+    private val _email = MutableStateFlow(Input(text = "" , validationResult = InputValidationResult.Loading))
+    val email: StateFlow<Input> = _email
+
+    private val _password = MutableStateFlow(Input(text = "" ,validationResult = InputValidationResult.Loading))
+    val password: StateFlow<Input> = _password
+
+
+     private fun onEmailChanged(email: String) {
+         _email.value = _email.value.copy(
+             text = email,
+             validationResult = EmailValidator.validate(email)
+         )
+    }
+
+    private fun onPasswordChanged(password: String)
+    {
+        _password.value = _password.value.copy(
+            text = password,
+            validationResult = PasswordValidator.validate(password)
+        )
+    }
 
     fun onEvent(event: LoginScreenEvent) {
         when (event) {
@@ -21,6 +51,14 @@ class LoginViewModel(private val loginUseCase: LoginUseCase) : ScreenModel {
             is LoginScreenEvent.DismissAlertDialog -> {
                 dismissAlertDialog()
             }
+            is LoginScreenEvent.EmailChanged -> {
+                onEmailChanged(event.email)
+            }
+
+            is LoginScreenEvent.PasswordChanged -> {
+                   onPasswordChanged(event.password)
+            }
+
         }
     }
 
@@ -31,15 +69,15 @@ class LoginViewModel(private val loginUseCase: LoginUseCase) : ScreenModel {
                     is Response.Loading -> {
                         _loginState.value = _loginState.value.copy(
                             loading = true,
-                            error = null,
-                            firebaseUser = null
+                            loginError  = null,
+                            firebaseUser = null,
                         )
                     }
 
                     is Response.Success -> {
                         _loginState.value = _loginState.value.copy(
                             loading = false,
-                            error = null,
+                            loginError = null,
                             firebaseUser = response.data.user
                         )
 
@@ -48,7 +86,7 @@ class LoginViewModel(private val loginUseCase: LoginUseCase) : ScreenModel {
                     is Response.Error -> {
                         _loginState.value = _loginState.value.copy(
                             loading = false,
-                            error = response.message,
+                            loginError = response.message,
                             firebaseUser = null
                         )
                     }
@@ -61,7 +99,7 @@ class LoginViewModel(private val loginUseCase: LoginUseCase) : ScreenModel {
         _loginState.value = _loginState.value.copy(
             loading = false,
             firebaseUser = null,
-            error = null
+            loginError = null
         )
     }
 }

@@ -20,11 +20,9 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -32,6 +30,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import foodie.composeapp.generated.resources.Res
 import foodie.composeapp.generated.resources.login_logo
+import org.betaapps.foodie.domain.validation.InputValidationResult
 import org.betaapps.foodie.presentation.dashboard.DashboardScreen
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.getKoin
@@ -42,8 +41,9 @@ object LoginScreen : Screen {
 
         val viewModel: LoginViewModel = getKoin().get()
         val loginState by viewModel.loginState.collectAsState()
-        var email by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
+        val email by viewModel.email.collectAsState()
+        val password by viewModel.password.collectAsState()
+
         val navigator = LocalNavigator.currentOrThrow
         Column(
             modifier = Modifier
@@ -62,24 +62,43 @@ object LoginScreen : Screen {
             )
             Spacer(Modifier.height(64.dp))
             TextField(
-                value = email,
-                onValueChange = { email = it },
+                value = email.text,
+                onValueChange = { viewModel.onEvent(LoginScreenEvent.EmailChanged(it)) },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth()
             )
+            if (email.validationResult is InputValidationResult.Error) {
+                Text(
+                    text = (email.validationResult as InputValidationResult.Error).message,
+                    color = Color.Red,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
             Spacer(Modifier.height(8.dp))
             TextField(
-                value = password,
-                onValueChange = { password = it },
+                value = password.text,
+                onValueChange = { viewModel.onEvent(LoginScreenEvent.PasswordChanged(it)) },
                 label = { Text("Password") },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
+            if (password.validationResult is InputValidationResult.Error) {
+                Text(
+                    text = (password.validationResult as InputValidationResult.Error).message,
+                    color = Color.Red,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+            }
             Spacer(Modifier.height(16.dp))
             ElevatedButton(
                 modifier = Modifier.fillMaxWidth(),
                 onClick = {
-                    viewModel.onEvent(LoginScreenEvent.Login(email = email, password = password))
+                    viewModel.onEvent(
+                        LoginScreenEvent.Login(
+                            email = email.text,
+                            password = password.text
+                        )
+                    )
                 }) {
                 Text("Login")
             }
@@ -103,7 +122,7 @@ object LoginScreen : Screen {
                 navigator.replace(DashboardScreen())
             }
 
-            loginState.error != null -> {
+            loginState.loginError != null -> {
                 AlertDialog(
                     onDismissRequest = {
                         viewModel.onEvent(LoginScreenEvent.DismissAlertDialog)
@@ -112,7 +131,7 @@ object LoginScreen : Screen {
                         Text(text = "Error")
                     },
                     text = {
-                        Text(text = loginState.error!!)
+                        Text(text = loginState.loginError!!)
                     },
                     confirmButton = {
                         TextButton(onClick = {
