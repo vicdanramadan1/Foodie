@@ -1,7 +1,7 @@
 package org.betaapps.foodie.domain.validation
 
 
-object UsernameValidator : Validator<String> {
+object FullNameValidator : Validator<String> {
     override fun validate(value: String): InputValidationResult {
         return when {
             value.isBlank() ->

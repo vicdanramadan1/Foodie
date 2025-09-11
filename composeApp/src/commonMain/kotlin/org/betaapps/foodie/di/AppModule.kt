@@ -1,8 +1,6 @@
 package org.betaapps.foodie.di
 
-import org.betaapps.foodie.domain.repository.AuthRepository
 import GetRestaurantsUseCase
-import org.betaapps.foodie.domain.usecases.LoginUseCase
 import RestaurantRepository
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.FirebaseAuth
@@ -11,7 +9,11 @@ import dev.gitlive.firebase.firestore.FirebaseFirestore
 import dev.gitlive.firebase.firestore.firestore
 import org.betaapps.foodie.data.repository.AuthRepositoryImpl
 import org.betaapps.foodie.data.repository.RestaurantRepositoryImpl
+import org.betaapps.foodie.domain.repository.AuthRepository
+import org.betaapps.foodie.domain.usecases.LoginUseCase
+import org.betaapps.foodie.domain.usecases.RegisterUserUseCase
 import org.betaapps.foodie.presentation.login.LoginViewModel
+import org.betaapps.foodie.presentation.register.RegisterScreenViewModel
 import org.betaapps.foodie.presentation.restaurants.restaurantslist.RestaurantsListScreenViewModel
 import org.betaapps.foodie.presentation.shoppingcart.ShoppingCartViewModel
 import org.koin.core.context.startKoin
@@ -22,17 +24,19 @@ val appModule = module {
     single<FirebaseAuth> { Firebase.auth }
     single<FirebaseFirestore> { Firebase.firestore }
 
-    single<AuthRepository> { AuthRepositoryImpl(get()) }
+    single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     single<RestaurantRepository> { RestaurantRepositoryImpl(get()) }
 
     single { LoginUseCase(get()) }
     single { GetRestaurantsUseCase(get()) }
+    single { RegisterUserUseCase(get()) }
 
     single { ShoppingCartViewModel() }
     single { RestaurantsListScreenViewModel(get()) }
-    single {LoginViewModel(get())}
+    single { LoginViewModel(get()) }
+    single { RegisterScreenViewModel(get()) }
 }
 
-fun initKoin(){
+fun initKoin() {
     startKoin { modules(appModule) }
 }
