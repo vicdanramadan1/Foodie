@@ -2,8 +2,11 @@ package org.betaapps.foodie.presentation.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -32,6 +36,7 @@ import foodie.composeapp.generated.resources.Res
 import foodie.composeapp.generated.resources.login_logo
 import org.betaapps.foodie.domain.validation.InputValidationResult
 import org.betaapps.foodie.presentation.dashboard.DashboardScreen
+import org.betaapps.foodie.presentation.register.RegisterScreen
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.getKoin
 
@@ -103,6 +108,24 @@ object LoginScreen : Screen {
                 Text("Login")
             }
 
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = "Don't have an account? ",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "Register",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    modifier = Modifier.clickable { navigator.push(RegisterScreen()) }
+                )
+            }
         }
 
         when {
