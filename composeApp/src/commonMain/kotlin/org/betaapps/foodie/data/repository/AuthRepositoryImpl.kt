@@ -2,6 +2,7 @@ package org.betaapps.foodie.data.repository
 
 import dev.gitlive.firebase.auth.AuthResult
 import dev.gitlive.firebase.auth.FirebaseAuth
+import dev.gitlive.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -14,6 +15,7 @@ import org.betaapps.foodie.domain.repository.AuthRepository
 
 class AuthRepositoryImpl(
     private val firebaseAuth: FirebaseAuth,
+    private val firebaseFirestore: FirebaseFirestore,
     val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 ) : AuthRepository {
     override suspend fun login(email: String, password: String): Flow<Response<AuthResult>> {
@@ -31,10 +33,28 @@ class AuthRepositoryImpl(
         }
     }
 
-    override suspend fun signup(name: String, email: String, password: String): Result<User> =
-        Result.success(
-            User("2", name, email, "")
-        )
+    override suspend fun signup(user: User, password: String): Flow<Response<AuthResult>> {
+        return flow {
+            emit(Response.Loading)
+            try {
+                val data =
+                    scope.async {
+                        firebaseAuth.createUserWithEmailAndPassword(
+                            email = user.email,
+                            password = password
+                        )
+                    }.await()
+                        .apply {
+                            firebaseFirestore.collection("users")
+                                .add(user.copy(id = this.user?.uid!!))
+                        }
+                emit(Response.Success(data))
+            } catch (e: Exception) {
+                emit(Response.Error(e.message ?: "something went wrong."))
+            }
+
+        }
+    }
 
     override suspend fun logout() {}
     override fun getCurrentUser(): User? = null

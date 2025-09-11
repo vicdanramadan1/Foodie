@@ -7,7 +7,7 @@ import org.betaapps.foodie.domain.model.Response
 
 interface AuthRepository {
     suspend fun login(email: String, password: String): Flow<Response<AuthResult>>
-    suspend fun signup(name: String, email: String, password: String): Result<User>
+    suspend fun signup(user: User, password: String): Flow<Response<AuthResult>>
     suspend fun logout()
     fun getCurrentUser(): User?
 }
