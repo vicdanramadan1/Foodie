@@ -33,6 +33,21 @@ class AuthRepositoryImpl(
         }
     }
 
+    override suspend fun forgotPassword(email: String): Flow<Response<Unit>> {
+        return flow {
+            emit(Response.Loading)
+            try {
+                val data = scope.async {
+                    firebaseAuth.sendPasswordResetEmail(email = email)
+                }.await()
+                emit(Response.Success(data))
+
+            }catch (e: Exception)
+            {
+                emit(Response.Error(e.message?: "something went wrong"))
+            }
+        }
+    }
     override suspend fun signup(user: User, password: String): Flow<Response<AuthResult>> {
         return flow {
             emit(Response.Loading)

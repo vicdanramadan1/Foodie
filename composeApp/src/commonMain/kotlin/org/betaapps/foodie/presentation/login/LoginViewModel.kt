@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.betaapps.foodie.domain.model.Input
 import org.betaapps.foodie.domain.model.Response
+import org.betaapps.foodie.domain.usecases.ForgotPasswordUseCase
 import org.betaapps.foodie.domain.usecases.LoginUseCase
 import org.betaapps.foodie.domain.validation.EmailValidator
 import org.betaapps.foodie.domain.validation.InputValidationResult
@@ -14,6 +15,7 @@ import org.betaapps.foodie.domain.validation.PasswordValidator
 
 class LoginViewModel(
     private val loginUseCase: LoginUseCase,
+    private val forgotPasswordUseCase: ForgotPasswordUseCase
 ) : ScreenModel {
 
     private val _loginState = MutableStateFlow(LoginScreenState())
@@ -26,6 +28,7 @@ class LoginViewModel(
     private val _password =
         MutableStateFlow(Input(text = "", validationResult = InputValidationResult.Loading))
     val password: StateFlow<Input> = _password
+
 
     private fun onEmailChanged(email: String) {
         _email.value = _email.value.copy(
@@ -48,11 +51,20 @@ class LoginViewModel(
                     login(email = event.email, password = event.password)
                 } else {
                     _loginState.value = _loginState.value.copy(
-                        loginError = "please check all fields",
+                        alertDialogMessage = "please check all fields",
                         firebaseUser = null,
                         loading = false
                     )
                 }
+            }
+
+            is LoginScreenEvent.ShowForgotPasswordDialog -> {
+                _loginState.value = _loginState.value.copy(
+                    showForgotPasswordDialog = true
+                )
+            }
+            is LoginScreenEvent.SendPasswordByEmail -> {
+                sendPasswordByEmail(event.email)
             }
 
             is LoginScreenEvent.DismissAlertDialog -> {
@@ -81,7 +93,7 @@ class LoginViewModel(
                     is Response.Loading -> {
                         _loginState.value = _loginState.value.copy(
                             loading = true,
-                            loginError = null,
+                            alertDialogMessage = null,
                             firebaseUser = null,
                         )
                     }
@@ -89,7 +101,7 @@ class LoginViewModel(
                     is Response.Success -> {
                         _loginState.value = _loginState.value.copy(
                             loading = false,
-                            loginError = null,
+                            alertDialogMessage = null,
                             firebaseUser = response.data.user
                         )
 
@@ -98,7 +110,7 @@ class LoginViewModel(
                     is Response.Error -> {
                         _loginState.value = _loginState.value.copy(
                             loading = false,
-                            loginError = response.message,
+                            alertDialogMessage = response.message,
                             firebaseUser = null
                         )
                     }
@@ -107,11 +119,37 @@ class LoginViewModel(
         }
     }
 
+    private fun sendPasswordByEmail(email: String)
+    {
+        screenModelScope.launch {
+            forgotPasswordUseCase.invoke(email = email).collect { response ->
+                when(response)
+                {
+                    is Response.Success -> {
+                        _loginState.value = _loginState.value.copy(
+                            alertDialogMessage = "password sent successfully"
+                        )
+                    }
+                    is Response.Error -> {
+                        _loginState.value = _loginState.value.copy(
+                            alertDialogMessage = response.message
+                        )
+                    }
+                    is Response.Loading -> {
+
+                    }
+                }
+
+            }
+        }
+    }
+
     private fun dismissAlertDialog() {
         _loginState.value = _loginState.value.copy(
             loading = false,
             firebaseUser = null,
-            loginError = null
+            alertDialogMessage = null,
+            showForgotPasswordDialog = false
         )
     }
 }

@@ -36,6 +36,7 @@ import foodie.composeapp.generated.resources.Res
 import foodie.composeapp.generated.resources.login_logo
 import org.betaapps.foodie.domain.validation.InputValidationResult
 import org.betaapps.foodie.presentation.dashboard.DashboardScreen
+import org.betaapps.foodie.presentation.login.composables.ForgotPasswordDialog
 import org.betaapps.foodie.presentation.register.RegisterScreen
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.getKoin
@@ -126,6 +127,14 @@ object LoginScreen : Screen {
                     modifier = Modifier.clickable { navigator.push(RegisterScreen()) }
                 )
             }
+            Text(
+                text = "Forgot your password?",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                ),
+                modifier = Modifier.clickable { viewModel.onEvent(LoginScreenEvent.ShowForgotPasswordDialog) }
+            )
         }
 
         when {
@@ -145,16 +154,13 @@ object LoginScreen : Screen {
                 navigator.replace(DashboardScreen())
             }
 
-            loginState.loginError != null -> {
+            loginState.alertDialogMessage != null -> {
                 AlertDialog(
                     onDismissRequest = {
                         viewModel.onEvent(LoginScreenEvent.DismissAlertDialog)
                     },
-                    title = {
-                        Text(text = "Error")
-                    },
                     text = {
-                        Text(text = loginState.loginError!!)
+                        Text(text = loginState.alertDialogMessage!!)
                     },
                     confirmButton = {
                         TextButton(onClick = {
@@ -165,7 +171,13 @@ object LoginScreen : Screen {
                     }
                 )
             }
+
+            loginState.showForgotPasswordDialog -> {
+                        ForgotPasswordDialog(
+                            onSendClick = {viewModel.onEvent(LoginScreenEvent.SendPasswordByEmail(it))},
+                            onCancelClick = {viewModel.onEvent(LoginScreenEvent.DismissAlertDialog)}
+                        )
+            }
         }
     }
-
 }
