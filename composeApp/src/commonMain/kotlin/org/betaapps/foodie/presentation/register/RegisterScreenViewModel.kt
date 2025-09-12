@@ -87,6 +87,58 @@ class RegisterScreenViewModel(
         )
     }
 
+    ///TODO : refactor this function
+    private fun isFormValid(): Boolean {
+        return _email.value.validationResult is InputValidationResult.Success
+                && _password.value.validationResult is InputValidationResult.Success
+                && _fullName.value.validationResult is InputValidationResult.Success
+                && _phoneNumber.value.validationResult is InputValidationResult.Success
+                && _address.value.validationResult is InputValidationResult.Success
+    }
+
+    private fun register(password: String) {
+        screenModelScope.launch {
+            registerUserUseCase.invoke(
+                user = User(
+                    address = _address.value.text,
+                    email = _email.value.text,
+                    order = null,
+                    id = "",
+                    name = _fullName.value.text
+                ),
+
+                password = password
+            )
+                .collect { response ->
+                    when (response) {
+                        is Response.Loading -> {
+                            _registrationState.value = _registrationState.value.copy(
+                                loading = true,
+                                firebaseUser = null,
+                                registrationError = null
+                            )
+                        }
+
+                        is Response.Success -> {
+                            _registrationState.value = _registrationState.value.copy(
+                                loading = false,
+                                firebaseUser = response.data.user,
+                                registrationError = null
+                            )
+                        }
+
+                        is Response.Error -> {
+                            _registrationState.value = _registrationState.value.copy(
+                                loading = false,
+                                firebaseUser = null,
+                                registrationError = response.message
+                            )
+                        }
+                    }
+                }
+        }
+    }
+
     fun onEvent(event: RegisterScreenEvent) {
         when (event) {
             is RegisterScreenEvent.EmailChanged -> {
@@ -110,46 +162,16 @@ class RegisterScreenViewModel(
             }
 
             is RegisterScreenEvent.Register -> {
-                screenModelScope.launch {
-                    registerUserUseCase.invoke(
-                        user = User(
-                            address = _address.value.text,
-                            email = _email.value.text,
-                            order = null,
-                            id = "",
-                            name = _fullName.value.text
-                        ),
-
-                        password = event.password
+                if (isFormValid()) {
+                    register(event.password)
+                } else {
+                    _registrationState.value = _registrationState.value.copy(
+                        loading = false,
+                        firebaseUser = null,
+                        registrationError = "please check all fields"
                     )
-                        .collect { response ->
-                            when (response) {
-                                is Response.Loading -> {
-                                    _registrationState.value = _registrationState.value.copy(
-                                        loading = true,
-                                        firebaseUser = null,
-                                        registrationError = null
-                                    )
-                                }
-
-                                is Response.Success -> {
-                                    _registrationState.value = _registrationState.value.copy(
-                                        loading = false,
-                                        firebaseUser = response.data.user,
-                                        registrationError = null
-                                    )
-                                }
-
-                                is Response.Error -> {
-                                    _registrationState.value = _registrationState.value.copy(
-                                        loading = false,
-                                        firebaseUser = null,
-                                        registrationError = response.message
-                                    )
-                                }
-                            }
-                        }
                 }
+
             }
 
             is RegisterScreenEvent.DismissAlertDialog -> {

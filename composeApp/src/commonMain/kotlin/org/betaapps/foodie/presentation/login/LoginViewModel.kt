@@ -3,8 +3,8 @@ package org.betaapps.foodie.presentation.login
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.betaapps.foodie.domain.model.Input
 import org.betaapps.foodie.domain.model.Response
 import org.betaapps.foodie.domain.usecases.LoginUseCase
@@ -13,29 +13,28 @@ import org.betaapps.foodie.domain.validation.InputValidationResult
 import org.betaapps.foodie.domain.validation.PasswordValidator
 
 class LoginViewModel(
-
     private val loginUseCase: LoginUseCase,
 ) : ScreenModel {
 
     private val _loginState = MutableStateFlow(LoginScreenState())
     val loginState: StateFlow<LoginScreenState> = _loginState
 
-    private val _email = MutableStateFlow(Input(text = "" , validationResult = InputValidationResult.Loading))
+    private val _email =
+        MutableStateFlow(Input(text = "", validationResult = InputValidationResult.Loading))
     val email: StateFlow<Input> = _email
 
-    private val _password = MutableStateFlow(Input(text = "" ,validationResult = InputValidationResult.Loading))
+    private val _password =
+        MutableStateFlow(Input(text = "", validationResult = InputValidationResult.Loading))
     val password: StateFlow<Input> = _password
 
-
-     private fun onEmailChanged(email: String) {
-         _email.value = _email.value.copy(
-             text = email,
-             validationResult = EmailValidator.validate(email)
-         )
+    private fun onEmailChanged(email: String) {
+        _email.value = _email.value.copy(
+            text = email,
+            validationResult = EmailValidator.validate(email)
+        )
     }
 
-    private fun onPasswordChanged(password: String)
-    {
+    private fun onPasswordChanged(password: String) {
         _password.value = _password.value.copy(
             text = password,
             validationResult = PasswordValidator.validate(password)
@@ -45,21 +44,34 @@ class LoginViewModel(
     fun onEvent(event: LoginScreenEvent) {
         when (event) {
             is LoginScreenEvent.Login -> {
-                login(email = event.email, password = event.password)
+                if (isFormValid()) {
+                    login(email = event.email, password = event.password)
+                } else {
+                    _loginState.value = _loginState.value.copy(
+                        loginError = "please check all fields",
+                        firebaseUser = null,
+                        loading = false
+                    )
+                }
             }
 
             is LoginScreenEvent.DismissAlertDialog -> {
                 dismissAlertDialog()
             }
+
             is LoginScreenEvent.EmailChanged -> {
                 onEmailChanged(event.email)
             }
 
             is LoginScreenEvent.PasswordChanged -> {
-                   onPasswordChanged(event.password)
+                onPasswordChanged(event.password)
             }
-
         }
+    }
+
+    private fun isFormValid(): Boolean {
+        return _email.value.validationResult is InputValidationResult.Success &&
+                _password.value.validationResult is InputValidationResult.Success
     }
 
     private fun login(email: String, password: String) {
@@ -69,7 +81,7 @@ class LoginViewModel(
                     is Response.Loading -> {
                         _loginState.value = _loginState.value.copy(
                             loading = true,
-                            loginError  = null,
+                            loginError = null,
                             firebaseUser = null,
                         )
                     }
