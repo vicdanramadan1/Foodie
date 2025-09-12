@@ -6,7 +6,7 @@ object EmailValidator : Validator<String> {
     override fun validate(value: String): InputValidationResult {
         return if (value.isBlank()) {
             InputValidationResult.Error(message = "Email cannot be empty")
-        } else if (Regex(regex).matches(value)) {
+        } else if (!Regex(regex).matches(value)) {
             InputValidationResult.Error( message = "Invalid email format")
         } else {
             InputValidationResult.Success

@@ -10,6 +10,7 @@ import dev.gitlive.firebase.firestore.firestore
 import org.betaapps.foodie.data.repository.AuthRepositoryImpl
 import org.betaapps.foodie.data.repository.RestaurantRepositoryImpl
 import org.betaapps.foodie.domain.repository.AuthRepository
+import org.betaapps.foodie.domain.usecases.ForgotPasswordUseCase
 import org.betaapps.foodie.domain.usecases.LoginUseCase
 import org.betaapps.foodie.domain.usecases.RegisterUserUseCase
 import org.betaapps.foodie.presentation.login.LoginViewModel
@@ -30,10 +31,11 @@ val appModule = module {
     single { LoginUseCase(get()) }
     single { GetRestaurantsUseCase(get()) }
     single { RegisterUserUseCase(get()) }
+    single { ForgotPasswordUseCase(get()) }
 
     single { ShoppingCartViewModel() }
     single { RestaurantsListScreenViewModel(get()) }
-    single { LoginViewModel(get()) }
+    single { LoginViewModel(get() , get()) }
     single { RegisterScreenViewModel(get()) }
 }
 
