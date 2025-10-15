@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.runtime.Applier
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,19 +33,20 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import dev.gitlive.firebase.auth.FirebaseAuth
 import foodie.composeapp.generated.resources.Res
 import foodie.composeapp.generated.resources.login_logo
 import org.betaapps.foodie.domain.validation.InputValidationResult
 import org.betaapps.foodie.presentation.dashboard.DashboardScreen
 import org.betaapps.foodie.presentation.login.composables.ForgotPasswordDialog
 import org.betaapps.foodie.presentation.register.RegisterScreen
+import org.betaapps.foodie.presentation.utils.AppLogger
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.getKoin
 
 object LoginScreen : Screen {
     @Composable
     override fun Content() {
-
         val viewModel: LoginViewModel = getKoin().get()
         val loginState by viewModel.loginState.collectAsState()
         val email by viewModel.email.collectAsState()
@@ -151,6 +153,7 @@ object LoginScreen : Screen {
             }
 
             loginState.firebaseUser != null -> {
+                AppLogger.i("logged " , loginState.firebaseUser!!.uid)
                 navigator.replace(DashboardScreen())
             }
 
