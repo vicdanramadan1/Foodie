@@ -38,13 +38,13 @@ import org.betaapps.foodie.domain.validation.InputValidationResult
 import org.betaapps.foodie.presentation.dashboard.DashboardScreen
 import org.betaapps.foodie.presentation.login.composables.ForgotPasswordDialog
 import org.betaapps.foodie.presentation.register.RegisterScreen
+import org.betaapps.foodie.presentation.utils.AppLogger
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.getKoin
 
 object LoginScreen : Screen {
     @Composable
     override fun Content() {
-
         val viewModel: LoginViewModel = getKoin().get()
         val loginState by viewModel.loginState.collectAsState()
         val email by viewModel.email.collectAsState()
@@ -151,6 +151,7 @@ object LoginScreen : Screen {
             }
 
             loginState.firebaseUser != null -> {
+                AppLogger.i("logged " , loginState.firebaseUser!!.uid)
                 navigator.replace(DashboardScreen())
             }
 

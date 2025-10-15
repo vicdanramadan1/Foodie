@@ -2,6 +2,7 @@ package org.betaapps.foodie.data.repository
 
 import dev.gitlive.firebase.auth.AuthResult
 import dev.gitlive.firebase.auth.FirebaseAuth
+import dev.gitlive.firebase.auth.FirebaseUser
 import dev.gitlive.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -72,5 +73,6 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun logout() {}
-    override fun getCurrentUser(): User? = null
+
+    override suspend fun getCurrentUser(): FirebaseUser? = firebaseAuth.currentUser
 }
